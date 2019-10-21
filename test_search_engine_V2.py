@@ -28,6 +28,10 @@ txt = my_file.read()
 
 json_obj = json.loads(txt)
 score = 0
+count = 1
+error=0
+error_list = list()
+false_list = list()
 
 for data in json_obj['data']:
     question = deepcut.tokenize(data['question'])
@@ -41,28 +45,38 @@ for data in json_obj['data']:
                                     }
                       }
             }
+    try:
+        res2 = es.search(index="test_search_engine_v2",body=query)
 
-    res2 = es.search(index="test_search_engine_v2",body=query)
+        art_id1 =  res2['hits']['hits'][0]['_source']['art_id']
+        paragraph1 =  res2['hits']['hits'][0]['_source']['paragraph']
+        start_pos1 = res2['hits']['hits'][0]['_source']['start_pos']
+        end_pos1 =  res2['hits']['hits'][0]['_source']['end_pos']
 
-    art_id1 =  res2['hits']['hits'][0]['_source']['art_id']
-    paragraph1 =  res2['hits']['hits'][0]['_source']['paragraph']
-    start_pos1 = res2['hits']['hits'][0]['_source']['start_pos']
-    end_pos1 =  res2['hits']['hits'][0]['_source']['end_pos']
+        art_id2 =  res2['hits']['hits'][1]['_source']['art_id']
+        paragraph2 =  res2['hits']['hits'][1]['_source']['paragraph']
+        start_pos2 = res2['hits']['hits'][1]['_source']['start_pos']
+        end_pos2 =  res2['hits']['hits'][1]['_source']['end_pos']
 
-    art_id2 =  res2['hits']['hits'][1]['_source']['art_id']
-    paragraph2 =  res2['hits']['hits'][1]['_source']['paragraph']
-    start_pos2 = res2['hits']['hits'][1]['_source']['start_pos']
-    end_pos2 =  res2['hits']['hits'][1]['_source']['end_pos']
-
-    answer_s = data['answer_begin_position ']
-    answer_e = data['answer_end_position']
+        answer_s = data['answer_begin_position ']
+        answer_e = data['answer_end_position']
 
 
-    if(check(start_pos1,end_pos1,start_pos2,end_pos2,answer_s,answer_e,art_id1,art_id2,data['article_id'])):
-        print("T")
-        score = score+1
-    else:
-        print("F")
+        if(check(start_pos1,end_pos1,start_pos2,end_pos2,answer_s,answer_e,art_id1,art_id2,data['article_id'])):
+            print("T")
+            score = score+1
+        else:
+            print("F")
+            false_list.append(data['article_id'])
+    except:
+        error_list.append(data['article_id'])
+        print("Error : ",data['article_id'],">",question)
+        error=error+1
 
 print("SCORE:",score,"/",len(json_obj['data']))
+print("ERROR:",error)
+print("--------------Error LIST-------------------")
+print(error_list)
+print("--------------False LIST-------------------")
+print(false_list)
 
