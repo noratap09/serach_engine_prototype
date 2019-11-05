@@ -4,7 +4,7 @@ import deepcut
 from elasticsearch import Elasticsearch
 es = Elasticsearch()
 
-my_file = open("ThaiQACorpus-DevelopmentDataset.json",'r',encoding = 'utf-8-sig')
+my_file = open("ThaiQACorpus2019-DevelopmentDataset.json",'r',encoding = 'utf-8-sig')
 txt = my_file.read()
 
 json_obj = json.loads(txt)
@@ -13,10 +13,13 @@ count = 1
 error=0
 error_list = list()
 false_list = list()
+rank=1
+resposn = list()
 
 for data in json_obj['data']:
     question = deepcut.tokenize(data['question'])
     question = " ".join(question)
+    question = question.replace("/","")
     print(count,")",data['article_id'],":",question)
 
     query = {
@@ -29,16 +32,17 @@ for data in json_obj['data']:
 
     try:
         res2 = es.search(index="test_search_engine_v1",body=query)
-        art_id =  res2['hits']['hits'][0]['_source']['art_id']
-        if(int(art_id) == data['article_id']):
+        for i in range(0,rank):
+            resposn.append(res2['hits']['hits'][i]['_source']['art_id'])
+        if(str(data['article_id']) in resposn):
             print("T")
             score = score+1
         else:
             print("F")
-            false_list.append(data['article_id'])
+            false_list.append(data['question_id'])
     except:
-        error_list.append(data['article_id'])
-        print("Error : ",data['article_id'],">",question)
+        error_list.append(data['question_id'])
+        print("Error : ",data['question_id'],">",question)
         error=error+1
     count = count+1
 

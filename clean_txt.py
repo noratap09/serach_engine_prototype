@@ -14,12 +14,13 @@ for myfile in path:
     list_art_id.append(art_id)
     print("LOAD FILE:",myfile)
 
-for i in range(0,len(list_txt)):
+"""
+    for i in range(0,len(list_txt)):
     pat_header = r'<doc id=".*" url=".*" title=".*">'
     pat_end = r"</doc>\n"
     list_txt[i] = re.sub(pat_header,"",list_txt[i])
     list_txt[i] = re.sub(pat_end,"",list_txt[i])
-
+"""
 
 dic_txt = dict(zip(list_art_id, list_txt))
 json_obj = json.dumps(dic_txt,ensure_ascii=False)
